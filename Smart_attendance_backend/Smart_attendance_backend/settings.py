@@ -37,10 +37,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    
     'corsheaders',
     'authentication',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'teacher_dashboard',
 ]
+
+# AUTH_USER_MODEL = "authentication.User"
+# settings.py
+
+TIME_ZONE = "Asia/Dhaka"
+
+USE_TZ = False
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "authentication.firebase_authentication.FirebaseAuthentication",
+    ),
+}
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -104,6 +121,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
 
 
 # Internationalization
