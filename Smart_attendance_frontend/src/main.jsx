@@ -20,6 +20,15 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import SeeStudents from "./Pages/teacher/SeeStudents.jsx";
+import StudentDashboard from "./Pages/student/StudentDashboard.jsx";
+import AttendanceHistory from "./Pages/student/AttendanceHistory.jsx";
+import Contact from "./Components/HomePages/Contact.jsx";
+import TeacherDashboardHome from "./Pages/teacher/TeacherDashboardHome.jsx";
+import AssignedCourses from "./Pages/teacher/AssignedCourse.jsx";
+import CourseDetails from "./Pages/teacher/CourseDetail.jsx";
+import AdminLogin from "./Pages/admin/AdminLogin.jsx";
+import AdminDashboard from "./Pages/admin/AdminDashboard.jsx";
+import AdminRoute from "./Components/Route/AdminRoute.jsx";
 
 const router = createBrowserRouter([
   {
@@ -28,12 +37,14 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,   // ✅ ErrorPage connected
     children: [
       { index: true, element: <Home /> },
+      { path: "contact" , element: <Contact /> },
 
       {
         element: <PublicRoute />,
         children: [
           { path: "register", element: <Register /> },
           { path: "login", element: <Login /> },
+          { path: "admin-login", element: <AdminLogin /> },
         ],
       },
 
@@ -41,14 +52,32 @@ const router = createBrowserRouter([
         element: <PrivateRoute />,
         children: [
            { path: "profile", element: <Profile /> },
-           { path: "teacher-dashboard", element: <TeacherDashboard /> },
+          //  { path: "teacher-dashboard", element: <TeacherDashboard /> },
+           { path: "teacher-dashboard/home", element: <TeacherDashboardHome /> },
+           { path: "teacher-dashboard/assigned-courses", element: <AssignedCourses /> },
+           { path: "/teacher-dashboard/course-details/:courseId", element: <CourseDetails /> },
+
            { path: "teacher-dashboard/create-class", element: <CreateClass /> },
            { path: "teacher-dashboard/created-class", element: <CreatedClass /> },
            { path: "teacher-dashboard/students", element: <SeeStudents /> },
+           { path: "student-dashboard", element: <StudentDashboard /> },
+           { path: "student/attendance", element: <AttendanceHistory /> },
+
+
+
 
 
          
         ],
+      },
+      {
+        element: <AdminRoute />,
+        children: [
+           { path: "/admin-dashboard", element: <AdminDashboard /> },
+          //  <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          //  { path: "teacher-dashboard", element: <TeacherDashboard /> },
+           
+        ]
       },
     ],
   },

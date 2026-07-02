@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
 
 import About from "./About";
+import Features from "./Features";
 import Hero from "./Hero";
 
 
@@ -10,6 +11,7 @@ export default function Home() {
       
       <main className="flex-1">
         <Hero/>
+        <Features/>
         <About/>
       </main>
       

@@ -1,88 +1,247 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../Contexts/AuthProvider"; // ✅ Auth context
+import { useAuth } from "../../Contexts/AuthProvider";
+import {
+  Menu,
+  X,
+  Home,
+  User,
+  LogOut,
+  LogIn,
+  UserPlus,
+  LayoutDashboard,
+} from "lucide-react";
 
 const Navbar = () => {
   const { user, profile, signOutUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 w-full bg-indigo-600 text-white px-6 py-4 flex justify-between items-center z-50 shadow-md">
-      {/* Logo */}
-      <h1 className="text-2xl font-bold">Smart Attendance</h1>
+    <>
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex justify-between items-center h-16">
+            
+            {/* Logo */}
+            <Link
+              to="/"
+              className="text-xl md:text-2xl font-bold tracking-wide"
+            >
+              Smart Attendance
+            </Link>
 
-      {/* Desktop Menu */}
-      <ul className="hidden md:flex gap-6">
-        <li><Link to="/" className="hover:text-yellow-300">Home</Link></li>
-        <li><a href="#features" className="hover:text-yellow-300">Features</a></li>
-        <li><a href="#contact" className="hover:text-yellow-300">Contact</a></li>
+            {/* Desktop Menu */}
+            <ul className="hidden md:flex items-center gap-6 font-medium">
+              <li>
+                <Link
+                  to="/"
+                  className="hover:text-blue-200 transition duration-200"
+                >
+                  Home
+                </Link>
+              </li>
 
-        {user ? (
-          <>
-            <li><Link to="/profile" className="hover:text-yellow-300">Profile</Link></li>
-            <li>
-              <button
-                onClick={signOutUser}
-                className="hover:text-yellow-300"
-              >
-                Logout
-              </button>
-            </li>
-          </>
-        ) : (
-          <>
-            <li><Link to="/register" className="hover:text-yellow-300">Register</Link></li>
-            <li><Link to="/login" className="hover:text-yellow-300">Login</Link></li>
-          </>
-        )}
-      </ul>
+              <li>
+                <a
+                  href="#features"
+                  className="hover:text-blue-200 transition duration-200"
+                >
+                  Features
+                </a>
+              </li>
 
-      {/* Mobile Hamburger */}
-      <button
-        className="md:hidden text-2xl focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        ☰
-      </button>
+              <li>
+                <a
+                  href="contact"
+                  className="hover:text-blue-200 transition duration-200"
+                >
+                  Contact
+                </a>
+              </li>
+
+              {user ? (
+                <>
+                  <li>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 hover:text-blue-200 transition"
+                    >
+                      <User size={18} />
+                      Profile
+                    </Link>
+                  </li>
+
+                  <li>
+                    <button
+                      onClick={signOutUser}
+                      className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition duration-200 hover:scale-105"
+                    >
+                      <LogOut size={18} />
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      to="/register"
+                      className="flex items-center gap-2 hover:text-blue-200 transition"
+                    >
+                      <UserPlus size={18} />
+                      Register
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="/login"
+                      className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition duration-200 hover:scale-105 shadow-sm flex items-center gap-2"
+                    >
+                      <LogIn size={18} />
+                      Login
+                    </Link>
+                    
+                  </li>
+                  <Link
+                      to="/admin-login"
+                      className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition duration-200 hover:scale-105 shadow-sm flex items-center gap-2"
+                    >
+                      <LogIn size={18} />
+                      Admin
+                    </Link>
+                </>
+              )}
+            </ul>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-white/10 transition"
+              onClick={() => setIsOpen(true)}
+            >
+              <Menu size={28} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-indigo-700 text-white transform ${
+        className={`fixed top-0 left-0 h-full w-[240px] bg-slate-800 text-white z-50 transform transition-transform duration-300 ease-in-out shadow-2xl ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out z-50`}
+        }`}
       >
-        <div className="flex justify-between items-center px-6 py-4 border-b border-indigo-500">
-          <h2 className="text-xl font-bold">Menu</h2>
-          <button onClick={() => setIsOpen(false)} className="text-2xl">✕</button>
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between px-5 h-16 border-b border-slate-700">
+          <h2 className="text-lg font-bold">Menu</h2>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="hover:text-red-400 transition"
+          >
+            <X size={26} />
+          </button>
         </div>
-        <ul className="flex flex-col gap-4 px-6 py-6">
-          <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
-          <li><a href="#features" onClick={() => setIsOpen(false)}>Features</a></li>
-          <li><a href="#contact" onClick={() => setIsOpen(false)}>Contact</a></li>
+
+        {/* Sidebar Links */}
+        <ul className="flex flex-col p-4 gap-2 text-[15px] font-medium">
+          
+          <li>
+            <Link
+              to="/"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 hover:text-white transition"
+            >
+              <Home size={18} />
+              Home
+            </Link>
+          </li>
+
+          <li>
+            <a
+              href="#features"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 hover:text-white transition"
+            >
+              <LayoutDashboard size={18} />
+              Features
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="contact"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 hover:text-white transition"
+            >
+              <User size={18} />
+              Contact
+            </a>
+          </li>
 
           {user ? (
             <>
-              <li><Link to="/profile" onClick={() => setIsOpen(false)}>Profile</Link></li>
+              <li>
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition"
+                >
+                  <User size={18} />
+                  Profile
+                </Link>
+              </li>
+
               <li>
                 <button
                   onClick={() => {
                     signOutUser();
                     setIsOpen(false);
                   }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition"
                 >
+                  <LogOut size={18} />
                   Logout
                 </button>
               </li>
             </>
           ) : (
             <>
-              <li><Link to="/register" onClick={() => setIsOpen(false)}>Register</Link></li>
-              <li><Link to="/login" onClick={() => setIsOpen(false)}>Login</Link></li>
+              <li>
+                <Link
+                  to="/register"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition"
+                >
+                  <UserPlus size={18} />
+                  Register
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg transition shadow"
+                >
+                  <LogIn size={18} />
+                  Login
+                </Link>
+              </li>
             </>
           )}
         </ul>
       </div>
-    </nav>
+    </>
   );
 };
 
