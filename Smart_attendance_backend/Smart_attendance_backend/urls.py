@@ -21,7 +21,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('authentication.urls')),  # authentication app এর urls
     path('teacher/', include('teacher_dashboard.urls')),  # teacher-dashboard app এর urls
+    path('student/', include('student_dashboard.urls')),  # student-dashboard app এর urls
 ]
+
 
 
 
