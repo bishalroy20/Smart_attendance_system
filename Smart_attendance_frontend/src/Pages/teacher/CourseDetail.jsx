@@ -49,7 +49,8 @@ export default function CourseDetails() {
           assignment: studentSaved.assignment ?? "",
           ct1: studentSaved.class_test_1 ?? "", 
           ct2: studentSaved.class_test_2 ?? "", 
-          attendanceMarks: studentSaved.attendance_marks ?? 10, 
+          // 🛠️ ফিক্স: অ্যাটেনডেন্স যদি আগে সেভ না থাকে, তবে ডিফল্ট হিসেবে ফাঁকা ("") বা ০ রাখা নিরাপদ
+          attendanceMarks: studentSaved.attendance_marks ?? "", 
         };
       });
       
@@ -77,7 +78,6 @@ export default function CourseDetails() {
         lock_course: lockStatus,
       };
       
-      // 🎯 ইউআরএল পাথটি ব্যাকএন্ডের সাথে নিখুঁতভাবে মেলানো হয়েছে
       await axios.post(`http://127.0.0.1:8000/teacher/course-details/${courseId}/save/`, payload);
       
       if (lockStatus) {
@@ -88,7 +88,6 @@ export default function CourseDetails() {
         alert("মার্কশিট প্রোগ্রেস সফলভাবে সেভ হয়েছে!");
       }
       
-      // ডাটাবেজের সাথে স্টেট সিঙ্ক রাখার জন্য পুনরায় ডাটা ফেচ করা
       fetchSemesterStudentsAndMarks();
     } catch (err) {
       console.error("Save marks error:", err);
@@ -184,7 +183,8 @@ export default function CourseDetails() {
                       <th className="py-3.5 px-4 text-center">Assignment (10)</th>
                       <th className="py-3.5 px-4 text-center">Class Test 1 (15)</th>
                       <th className="py-3.5 px-4 text-center">Class Test 2 (15)</th>
-                      <th className="py-3.5 px-4 text-center bg-indigo-50/50 text-indigo-700">Attendance (10)</th>
+                      {/* 🛠️ স্টাইল সামঞ্জস্য করা হয়েছে */}
+                      <th className="py-3.5 px-4 text-center">Attendance (10)</th>
                     </tr>
                   </thead>
                   <tbody className="text-slate-700 divide-y divide-slate-100 text-sm">
@@ -200,7 +200,7 @@ export default function CourseDetails() {
                             type="number"
                             disabled={isLocked}
                             placeholder="0"
-                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center"
+                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
                             value={marksData[student.id]?.assignment || ""}
                             onChange={(e) => handleMarkChange(student.id, "assignment", e.target.value)}
                           />
@@ -211,7 +211,7 @@ export default function CourseDetails() {
                             type="number"
                             disabled={isLocked}
                             placeholder="0"
-                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center"
+                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
                             value={marksData[student.id]?.ct1 || ""}
                             onChange={(e) => handleMarkChange(student.id, "ct1", e.target.value)}
                           />
@@ -222,14 +222,22 @@ export default function CourseDetails() {
                             type="number"
                             disabled={isLocked}
                             placeholder="0"
-                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center"
+                            className="w-20 px-2 py-1.5 border border-slate-200 rounded-lg text-center focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
                             value={marksData[student.id]?.ct2 || ""}
                             onChange={(e) => handleMarkChange(student.id, "ct2", e.target.value)}
                           />
                         </td>
 
-                        <td className="py-3.5 px-4 text-center bg-indigo-50/30 font-bold text-indigo-600 font-mono">
-                          {marksData[student.id]?.attendanceMarks} / 10
+                        {/* 🎯 ফিক্সড: স্ট্যাটিক টেক্সটের বদলে এখন এটি টাইপ করা যাবে এমন ইনপুট বক্সে রূপান্তরিত হয়েছে */}
+                        <td className="py-3.5 px-4 text-center bg-indigo-50/30">
+                          <input
+                            type="number"
+                            disabled={isLocked}
+                            placeholder="0"
+                            className="w-20 px-2 py-1.5 border border-indigo-200 rounded-lg text-center font-bold text-indigo-600 bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                            value={marksData[student.id]?.attendanceMarks || ""}
+                            onChange={(e) => handleMarkChange(student.id, "attendanceMarks", e.target.value)}
+                          />
                         </td>
                       </tr>
                     ))}

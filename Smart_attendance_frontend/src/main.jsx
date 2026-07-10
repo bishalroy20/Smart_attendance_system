@@ -32,12 +32,13 @@ import AdminRoute from "./Components/Route/AdminRoute.jsx";
 import StudentCourses from "./Pages/student/StudentCourses.jsx";
 import AttendanceList from "./Pages/teacher/AttendanceList.jsx";
 import CourseSummary from "./Pages/teacher/CourseSummary.jsx";
+import UploadTrainingImages from "./Components/Authentication/UploadTrainingImages.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
-    errorElement: <ErrorPage />,   // ✅ ErrorPage connected
+    errorElement: <ErrorPage />,  
     children: [
       { index: true, element: <Home /> },
       { path: "contact" , element: <Contact /> },
@@ -55,7 +56,6 @@ const router = createBrowserRouter([
         element: <PrivateRoute />,
         children: [
            { path: "profile", element: <Profile /> },
-          //  { path: "teacher-dashboard", element: <TeacherDashboard /> },
            { path: "teacher-dashboard/home", element: <TeacherDashboardHome /> },
            { path: "teacher-dashboard/assigned-courses", element: <AssignedCourses /> },
            { path: "/teacher-dashboard/course-details/:courseId", element: <CourseDetails /> },
@@ -72,6 +72,10 @@ const router = createBrowserRouter([
 
 
 
+           { path: "/upload-training-images", element: <UploadTrainingImages /> },
+
+
+
 
 
          
@@ -81,8 +85,7 @@ const router = createBrowserRouter([
         element: <AdminRoute />,
         children: [
            { path: "/admin-dashboard", element: <AdminDashboard /> },
-          //  <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          //  { path: "teacher-dashboard", element: <TeacherDashboard /> },
+          
            
         ]
       },

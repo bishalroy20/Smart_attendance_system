@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Building2,
   IdCard,
+  Upload,
 } from "lucide-react";
 
 export default function Profile() {
@@ -23,6 +24,7 @@ export default function Profile() {
   const [backendProfile, setBackendProfile] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({});
+  const [newAvatar, setNewAvatar] = useState(null);
 
   // 🔥 FETCH PROFILE
   useEffect(() => {
@@ -32,7 +34,6 @@ export default function Profile() {
           const res = await axios.get(
             `http://127.0.0.1:8000/api/users/${user.uid}/`
           );
-
           setBackendProfile(res.data);
           setForm(res.data);
         } catch (err) {
@@ -40,7 +41,6 @@ export default function Profile() {
         }
       }
     };
-
     fetchProfile();
   }, [user]);
 
@@ -59,13 +59,47 @@ export default function Profile() {
         `http://127.0.0.1:8000/api/users/${user.uid}/update/`,
         form
       );
-
       setBackendProfile(res.data);
       setEditMode(false);
-
       toast.success("Profile updated!");
     } catch (err) {
       toast.error("Update failed!");
+    }
+  };
+
+  // Helper: upload single file to ImgBB
+  async function uploadToImgBB(file) {
+    const apiKey = "aa7cc99fc48cd7b4535b604b6633af61"; // replace with your real key
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    return data.data.url; // ✅ ImgBB URL
+  }
+
+  // 🔥 UPDATE AVATAR
+  const handleAvatarUpload = async () => {
+    if (!newAvatar) return;
+    try {
+      // Step 1: Upload to ImgBB
+      const url = await uploadToImgBB(newAvatar);
+
+      // Step 2: Send URL to backend
+      const res = await axios.patch(
+        `http://127.0.0.1:8000/api/users/${user.uid}/update/`,
+        { avatarUrl: url }
+      );
+
+      setBackendProfile(res.data);
+      setNewAvatar(null);
+      toast.success("Avatar updated!");
+    } catch (err) {
+      toast.error("Avatar upload failed!");
     }
   };
 
@@ -96,14 +130,11 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 flex items-center justify-center px-4 py-10">
-
       <ToastContainer />
-
       <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 p-8">
 
         {/* HEADER */}
         <div className="flex flex-col items-center text-center">
-
           {/* AVATAR */}
           {backendProfile.avatarUrl ? (
             <img
@@ -117,10 +148,32 @@ export default function Profile() {
             </div>
           )}
 
-          <h2 className="text-3xl font-bold mt-4">
-            {backendProfile.name}
-          </h2>
+          {/* Change Avatar */}
+          <div className="mt-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setNewAvatar(e.target.files[0])}
+              className="hidden"
+              id="avatarUpload"
+            />
+            <label
+              htmlFor="avatarUpload"
+              className="cursor-pointer px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+            >
+              Change Avatar
+            </label>
+          </div>
+          {newAvatar && (
+            <button
+              onClick={handleAvatarUpload}
+              className="mt-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+            >
+              Upload
+            </button>
+          )}
 
+          <h2 className="text-3xl font-bold mt-4">{backendProfile.name}</h2>
           <div className="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1 rounded-full mt-2">
             <ShieldCheck size={16} />
             {backendProfile.role}
@@ -129,11 +182,10 @@ export default function Profile() {
 
         {/* INFO */}
         <div className="grid sm:grid-cols-2 gap-4 mt-8">
-
           <Input icon={<User size={16} />} label="Name" name="name" value={form.name} editMode={editMode} onChange={handleChange} />
           <Input icon={<Mail size={16} />} label="Email" name="email" value={form.email} editMode={editMode} onChange={handleChange} />
           <Input icon={<Phone size={16} />} label="Phone" name="phone" value={form.phone} editMode={editMode} onChange={handleChange} />
-          <Input icon={<GraduationCap size={16} />} label="Semester" name="semester" value={form.semester}  />
+          <Input icon={<GraduationCap size={16} />} label="Semester" name="semester" value={form.semester} />
           <Input icon={<Building2 size={16} />} label="Department" name="department" value={form.department} editMode={editMode} onChange={handleChange} />
           <Input icon={<IdCard size={16} />} label="Registration ID" name="regId" value={form.regId} editMode={editMode} onChange={handleChange} />
           <Input
@@ -147,14 +199,10 @@ export default function Profile() {
             }
             editMode={false}
           />
-
-
         </div>
 
         {/* BUTTONS */}
         <div className="mt-8 flex flex-col gap-3">
-
-          {/* EDIT */}
           <button
             onClick={() => setEditMode(!editMode)}
             className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition"
@@ -163,7 +211,6 @@ export default function Profile() {
             {editMode ? "Cancel Edit" : "Edit Profile"}
           </button>
 
-          {/* SAVE */}
           {editMode && (
             <button
               onClick={handleUpdate}
@@ -174,7 +221,14 @@ export default function Profile() {
             </button>
           )}
 
-          {/* DASHBOARD */}
+          <button
+            onClick={() => navigate("/upload-training-images")}
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-600 hover:text-white transition"
+          >
+            <Upload size={18} />
+            Upload Images
+          </button>
+
           <button
             onClick={goDashboard}
             className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-600 hover:text-white transition"
@@ -185,19 +239,13 @@ export default function Profile() {
       </div>
     </div>
   );
-}
 
-/* INPUT COMPONENT */
 function Input({ icon, label, name, value, editMode, onChange }) {
   return (
     <div>
-      <label className="text-sm font-semibold text-gray-600">
-        {label}
-      </label>
-
+      <label className="text-sm font-semibold text-gray-600">{label}</label>
       <div className="flex items-center gap-2 border p-2 rounded-lg mt-1 bg-gray-50">
         {icon}
-
         {editMode ? (
           <input
             name={name}
@@ -211,4 +259,5 @@ function Input({ icon, label, name, value, editMode, onChange }) {
       </div>
     </div>
   );
+}
 }
