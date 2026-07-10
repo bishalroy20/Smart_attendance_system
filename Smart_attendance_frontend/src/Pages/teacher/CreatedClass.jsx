@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom"; // Added for sidebar routing context tracking
 import axios from "axios";
 import { useAuth } from "../../Contexts/AuthProvider";
+import AttendanceList from "./AttendanceList";
 
 export default function CreatedClasses() {
   const { user } = useAuth();
@@ -14,6 +15,22 @@ export default function CreatedClasses() {
   // Mobile Panel Toggles
   const [open, setOpen] = useState(false); // Controls the Sidebar navigation view drawer
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Controls the inner data filter alert banner
+
+
+  const [attendance, setAttendance] = useState([]);
+  const [attendanceCount, setAttendanceCount] = useState(0);
+
+  const fetchAttendance = async (classId) => {
+    try {
+      const res = await axios.get(`http://127.0.0.1:8000/teacher/class-attendance/${classId}/`);
+      setAttendance(res.data.students);
+      setAttendanceCount(res.data.count);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
+
+
 
   useEffect(() => {
     if (user?.uid) {
@@ -98,6 +115,7 @@ export default function CreatedClasses() {
 
               {navItem("/teacher-dashboard/create-class", "Create Class")}
               {navItem("/teacher-dashboard/created-class", "Created Class")}
+              {navItem("/teacher-dashboard/course-summary", "Course Summary")}
               {navItem("/teacher-dashboard/students", "See Students")}
             </nav>
           </div>
@@ -208,12 +226,26 @@ export default function CreatedClasses() {
                                 🕒 {item.start_time} - {item.end_time}
                               </span>
                             </td>
+
+                            <td className="py-3.5 px-4">
+                              <Link
+                                to={`/teacher-dashboard/attendance/${item.id}`}
+
+                                className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs"
+                              >
+                                Details
+                              </Link>
+
+
+                            </td>
+
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                 )}
+                {/* <AttendanceList attendance={attendance} attendanceCount={attendanceCount} /> */}
 
               </div>
             </div>

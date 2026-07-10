@@ -88,6 +88,7 @@ export default function TeacherDashboardHome() {
              {navItem("/teacher-dashboard/assigned-courses", "Assigned Courses")} {/* নতুন যুক্ত হলো */}
               {navItem("/teacher-dashboard/create-class", "Create Class")}
               {navItem("/teacher-dashboard/created-class", "Created Class")}
+              {navItem("/teacher-dashboard/course-summary", "Course Summary")}
               {navItem("/teacher-dashboard/students", "See Students")}
             </nav>
           </div>

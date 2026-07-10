@@ -3,6 +3,8 @@ import axios from "axios";
 import StudentSidebar from "./StudentSidebar";
 import StudentNavbar from "./StudentNavbar";
 import { getAuth } from "firebase/auth";
+import { Bar, Pie } from "react-chartjs-2";
+import "chart.js/auto";
 
 export default function AttendanceHistory() {
   const [attendances, setAttendances] = useState([]);
@@ -16,13 +18,10 @@ export default function AttendanceHistory() {
   const fetchAttendance = async () => {
     try {
       const auth = getAuth();
-      const token = await auth.currentUser.getIdToken(true);
-
       const res = await axios.post(
         "http://127.0.0.1:8000/student/attendance-history/",
         { firebase_uid: auth.currentUser.uid }
       );
-
       setAttendances(res.data);
     } catch (err) {
       console.error(err);
@@ -36,6 +35,42 @@ export default function AttendanceHistory() {
       (filterCourseCode ? att.course_code === filterCourseCode : true)
     );
   });
+
+  // Chart data for all courses (Bar)
+  const courseCounts = attendances.reduce((acc, att) => {
+    acc[att.course_name] = (acc[att.course_name] || 0) + 1;
+    return acc;
+  }, {});
+
+  const barData = {
+    labels: Object.keys(courseCounts),
+    datasets: [
+      {
+        label: "Attendance Count",
+        data: Object.values(courseCounts),
+        backgroundColor: "rgba(99, 102, 241, 0.6)", // Indigo
+      },
+    ],
+  };
+
+  // Chart data for one course (Pie)
+  let pieData = null;
+  if (filterCourseName) {
+    const totalClasses = attendances.filter(
+      (att) => att.course_name === filterCourseName
+    ).length; // মোট ক্লাস সংখ্যা
+    const attendedClasses = filteredAttendances.length; // ছাত্র কতবার দিয়েছে
+
+    pieData = {
+      labels: ["Attended", "Missed"],
+      datasets: [
+        {
+          data: [attendedClasses, totalClasses - attendedClasses],
+          backgroundColor: ["rgba(34,197,94,0.7)", "rgba(239,68,68,0.7)"], // Green vs Red
+        },
+      ],
+    };
+  }
 
   return (
     <div className="flex bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 min-h-screen">
@@ -64,7 +99,7 @@ export default function AttendanceHistory() {
               )}
             </select>
 
-            <select
+            {/* <select
               className="select select-bordered w-full md:w-1/3"
               value={filterCourseCode}
               onChange={(e) => setFilterCourseCode(e.target.value)}
@@ -77,8 +112,27 @@ export default function AttendanceHistory() {
                   </option>
                 )
               )}
-            </select>
+            </select> */}
           </div>
+
+          {/* Chart Section */}
+          {/* <div className="mb-6 bg-white shadow rounded-lg p-4">
+            {filterCourseName ? (
+              <>
+                <h3 className="text-lg font-semibold text-indigo-700 mb-3">
+                  Attendance Pie Chart ({filterCourseName})
+                </h3>
+                <Pie data={pieData} />
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-indigo-700 mb-3">
+                  Attendance Bar Chart (All Courses)
+                </h3>
+                <Bar data={barData} />
+              </>
+            )}
+          </div> */}
 
           {/* Filtered Count */}
           <div className="mb-4">

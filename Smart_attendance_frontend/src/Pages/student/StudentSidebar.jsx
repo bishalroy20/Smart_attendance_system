@@ -18,11 +18,11 @@ export default function StudentSidebar() {
       path: "/student-dashboard",
       icon: <LayoutDashboard size={20} />,
     },
-    // {
-    //   name: "My Classes",
-    //   path: "/student/classes",
-    //   icon: <BookOpen size={20} />,
-    // },
+    {
+      name: "My Courses",
+      path: "/student/courses",
+      icon: <BookOpen size={20} />,
+    },
     {
       name: "Attendance",
       path: "/student/attendance",

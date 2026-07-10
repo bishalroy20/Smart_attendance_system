@@ -215,7 +215,7 @@ export default function Register() {
 
                   {[...Array(8)].map((_, i) => (
                     <option key={i}>
-                      {i + 1} Semester
+                      {i + 1} 
                     </option>
                   ))}
                 </select>

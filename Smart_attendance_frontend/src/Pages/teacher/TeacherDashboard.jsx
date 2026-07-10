@@ -69,6 +69,7 @@ export default function TeacherDashboard() {
 
               {navItem("/teacher-dashboard/create-class", "Create Class")}
               {navItem("/teacher-dashboard/created-class", "Created Class")}
+              {navItem("/teacher-dashboard/course-summary", "Course Summary")}
               {navItem("/teacher-dashboard/students", "See Students")}
             </nav>
           </div>

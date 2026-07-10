@@ -29,6 +29,9 @@ import CourseDetails from "./Pages/teacher/CourseDetail.jsx";
 import AdminLogin from "./Pages/admin/AdminLogin.jsx";
 import AdminDashboard from "./Pages/admin/AdminDashboard.jsx";
 import AdminRoute from "./Components/Route/AdminRoute.jsx";
+import StudentCourses from "./Pages/student/StudentCourses.jsx";
+import AttendanceList from "./Pages/teacher/AttendanceList.jsx";
+import CourseSummary from "./Pages/teacher/CourseSummary.jsx";
 
 const router = createBrowserRouter([
   {
@@ -60,8 +63,12 @@ const router = createBrowserRouter([
            { path: "teacher-dashboard/create-class", element: <CreateClass /> },
            { path: "teacher-dashboard/created-class", element: <CreatedClass /> },
            { path: "teacher-dashboard/students", element: <SeeStudents /> },
+           { path: "teacher-dashboard/attendance/:classId", element: <AttendanceList /> },
+
+           { path: "teacher-dashboard/course-summary", element: <CourseSummary /> },
            { path: "student-dashboard", element: <StudentDashboard /> },
            { path: "student/attendance", element: <AttendanceHistory /> },
+           { path: "student/courses", element: <StudentCourses /> },
 
 
 

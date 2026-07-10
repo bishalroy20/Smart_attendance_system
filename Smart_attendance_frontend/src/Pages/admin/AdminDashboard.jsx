@@ -72,13 +72,22 @@ export default function AdminDashboard() {
     }
 
     try {
+        // const payload = {
+        //     course_id: courseCode,
+        //     course_name: courseName,
+        //     session: session,
+        //     semester: parseInt(semester),
+        //     teacher: selectedTeacher,
+        // };
+
         const payload = {
-            course_id: courseCode,
-            course_name: courseName,
-            session: session,
-            semester: parseInt(semester),
-            teacher: selectedTeacher,
+          course_id: courseCode,
+          course_name: courseName,
+          session: session,
+          semester: parseInt(semester),
+          teacher: selectedTeacher,   // ✅ এখানে name পাঠাও
         };
+
 
         await axios.post(
             "http://127.0.0.1:8000/teacher/assign-course/",
@@ -92,15 +101,19 @@ export default function AdminDashboard() {
         setCourseName("");
         setCourseCode("");
         setSemester("");
+    
     } catch (err) {
-        if (err.response?.data?.error) {
-            toast.error(err.response.data.error);
-        } else {
-            toast.error(err.error );
-        }
-
-        console.error(err.response?.data);
+    if (err.response?.data?.error) {
+        toast.error(err.response.data.error);
+    } else if (err.response?.data) {
+        toast.error(JSON.stringify(err.response.data));
+    } else {
+        toast.error(err.message || "Unknown error");
     }
+
+    console.error("Error:", err.response?.data || err.message);
+}
+
 };
 
 
