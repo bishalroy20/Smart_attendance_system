@@ -35,4 +35,6 @@ urlpatterns = [
 
     path("students/<int:pk>/promote/", views.promote_to_teacher, name="promote-to-teacher"),
 
+    path("class-attendance/<int:class_id>/", views.class_attendance_list, name="class_attendance_list"),
+    path("course_class_summary/", views.course_class_summary, name="course_class_summary"),
 ]

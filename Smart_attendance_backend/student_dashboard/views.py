@@ -1,7 +1,7 @@
 # student_dashboard/views.py
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.response import Response
-from teacher_dashboard.models import Class
+from teacher_dashboard.models import Class , AssignedCourse
 from authentication.models import User
 from .models import Attendance
 from .serializers import (
@@ -149,3 +149,40 @@ def attendance_summary(student):
 
     return {"attended": list(attended_counts), "total": list(total_counts)}
 
+
+
+@api_view(['POST'])
+def student_courses(request):
+    firebase_uid = request.data.get("firebase_uid")
+    if not firebase_uid:
+        return Response({"error": "firebase_uid required"}, status=400)
+
+    try:
+        student = User.objects.get(firebase_uid=firebase_uid, role="student")
+    except User.DoesNotExist:
+        return Response({"error": "Student not found"}, status=404)
+
+    # ✅ regId থেকে session বের করো
+    if student.regId:
+        start_year = int(student.regId[:4])
+        session = f"{start_year}-{str(start_year + 1)[-2:]}"
+    else:
+        return Response({"error": "Student regId not found"}, status=404)
+
+    # ✅ AssignedCourse filter করো student.semester + session দিয়ে
+    courses = AssignedCourse.objects.filter(
+        semester=student.semester,
+        session=session
+    ).select_related("teacher")
+
+    data = [
+        {
+            "course_id": c.course_id,
+            "course_name": c.course_name,
+            "session": c.session,
+            "semester": c.semester,
+            "teacher_name": c.teacher.name,
+        }
+        for c in courses
+    ]
+    return Response(data)

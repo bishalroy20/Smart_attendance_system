@@ -15,8 +15,12 @@ from .serializers import (
 )
 from authentication.models import User
 from .models import AssignedCourse, StudentMark
+from student_dashboard.models import Attendance
+from django.db.models import Count
 
 
+
+#==============================Admin start==============================================
 @api_view(['POST'])
 def update_all_semesters(request):
     semester = request.data.get("semester")
@@ -112,6 +116,8 @@ def save_or_lock_marks(request, assigned_course_id):
     return Response({"message": "Marksheet progress updated successfully!"}, status=status.HTTP_200_OK)
 
 
+
+
 @api_view(['POST'])
 def assign_course(request):
     data = request.data
@@ -121,20 +127,35 @@ def assign_course(request):
         course_id=data.get("course_id"),
         session=data.get("session")
     ).first()
-
     if existing:
         return Response(
             {"error": f"{existing.course_name} ({existing.course_id}) is already assigned to {existing.teacher.name} for session {existing.session}."},
             status=400
         )
 
-    serializer = AssignedCourseSerializer(data=data)
+    # ✅ Resolve teacher string (UID or name) into pk
+    teacher_identifier = data.get("teacher")
+    try:
+        # If you’re sending Firebase UID:
+        teacher_obj = User.objects.get(firebase_uid=teacher_identifier, role="teacher")
+        # If you’re sending name instead, use:
+        # teacher_obj = User.objects.get(name=teacher_identifier, role="teacher")
+    except User.DoesNotExist:
+        return Response({"error": f"Teacher '{teacher_identifier}' not found"}, status=404)
+
+    payload = {
+        "course_id": data.get("course_id"),
+        "course_name": data.get("course_name"),
+        "session": data.get("session"),
+        "semester": data.get("semester"),
+        "teacher": teacher_obj.id,   # ✅ inject pk here
+    }
+
+    serializer = AssignedCourseSerializer(data=payload)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
-
-
 
 
 
@@ -157,6 +178,8 @@ def list_assigned_courses(request):
     serializer = AssignedCourseSerializer(courses, many=True)
     return Response(serializer.data)
 
+
+#==============================================Teacher start==============================================
 
 
 @api_view(['GET'])
@@ -284,6 +307,43 @@ def see_students(request):
 
 
 
+
+
+
+@api_view(['GET'])
+def class_attendance_list(request, class_id):
+    """
+    নির্দিষ্ট ক্লাসে কতজন ছাত্র attendance দিয়েছে এবং তাদের লিস্ট ফেরত দেবে।
+    """
+    try:
+        # ওই ক্লাসের attendance রেকর্ড বের করো
+        records = Attendance.objects.filter(attended_class_id=class_id).select_related("student")
+
+        data = [
+            {
+                "student_name": rec.student.name,
+                "student_regId": rec.student.regId,
+                "semester": rec.student.semester,
+                "submitted_at": rec.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "image_url": rec.image_url,
+            }
+            for rec in records
+        ]
+
+        return Response({
+            "count": records.count(),   # ✅ কতজন দিয়েছে
+            "students": data            # ✅ লিস্ট
+        })
+
+    except Class.DoesNotExist:
+        return Response({"error": "Class not found"}, status=404)
+
+
+
+
+
+
+
 @api_view(["GET"])
 def see_teacher(request):
 
@@ -311,3 +371,73 @@ def get_students(request):
     students = User.objects.filter(role="student")
     serializer = StudentSerializer(students, many=True)
     return Response(serializer.data)
+
+
+
+
+
+
+
+
+# @api_view(['GET'])
+# def course_class_summary(request):
+#     """
+#     প্রতিটি course_code + session অনুযায়ী কতগুলো class হয়েছে তার summary ফেরত দেবে।
+#     """
+#     summary = (
+#         Class.objects.values("course_code", "course_name", "session")
+#         .annotate(total_classes=Count("id"))
+#         .order_by("course_code", "session")
+#     )
+
+#     data = [
+#         {
+#             "course_code": item["course_code"],
+#             "course_name": item["course_name"],
+#             "session": item["session"],
+#             "total_classes": item["total_classes"],
+#         }
+#         for item in summary
+#     ]
+
+#     return Response(data)
+
+
+@api_view(['GET'])
+def course_class_summary(request):
+    firebase_uid = request.query_params.get("firebase_uid")
+
+    if not firebase_uid:
+        return Response(
+            {"error": "firebase_uid query parameter is required."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        teacher = User.objects.get(firebase_uid=firebase_uid, role="teacher")
+    except User.DoesNotExist:
+        return Response(
+            {"error": "Teacher not found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Teacher-এর assigned courses
+    assigned_courses = AssignedCourse.objects.filter(teacher=teacher)
+
+    summary = []
+
+    for course in assigned_courses:
+        total = Class.objects.filter(
+            course_code=course.course_id,
+            session=course.session
+        ).count()
+
+        summary.append({
+            "course_code": course.course_id,
+            "course_name": course.course_name,
+            "session": course.session,
+            "total_classes": total,
+        })
+
+    return Response(summary)
+

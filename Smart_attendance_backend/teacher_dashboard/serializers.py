@@ -73,3 +73,20 @@ class AssignedCourseSerializer(serializers.ModelSerializer):
             "teacher",
             "teacher_name",
         ]
+
+
+
+# class AssignedCourseSerializer(serializers.ModelSerializer):
+#     teacher_name = serializers.CharField(source="teacher.name", read_only=True)
+
+#     class Meta:
+#         model = AssignedCourse
+#         fields = [
+#             "id",
+#             "course_id",
+#             "course_name",
+#             "session",
+#             "semester",
+#             "teacher",       # pk হিসেবে save হবে
+#             "teacher_name",  # read_only display
+#         ]

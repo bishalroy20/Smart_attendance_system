@@ -20,4 +20,5 @@ urlpatterns = [
     path('attendance-history/', views.attendance_history, name='attendance_history'),
     path("attendance-summary/", views.attendance_summary, name="attendance_summary"),
     path("promote-semester/", views.promote_semester, name="promote_semester"),
+    path("courses/", views.student_courses, name="student_courses"),
 ]
