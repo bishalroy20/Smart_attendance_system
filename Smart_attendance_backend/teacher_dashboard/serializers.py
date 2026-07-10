@@ -1,4 +1,4 @@
-# teacher_dashboard/serializers.py
+
 
 from rest_framework import serializers
 from .models import Class,AssignedCourse
@@ -76,17 +76,3 @@ class AssignedCourseSerializer(serializers.ModelSerializer):
 
 
 
-# class AssignedCourseSerializer(serializers.ModelSerializer):
-#     teacher_name = serializers.CharField(source="teacher.name", read_only=True)
-
-#     class Meta:
-#         model = AssignedCourse
-#         fields = [
-#             "id",
-#             "course_id",
-#             "course_name",
-#             "session",
-#             "semester",
-#             "teacher",       # pk হিসেবে save হবে
-#             "teacher_name",  # read_only display
-#         ]

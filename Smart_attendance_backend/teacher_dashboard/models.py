@@ -4,7 +4,6 @@ from django.conf import settings
 from authentication.models import User 
 
 class AssignedCourse(models.Model):
-    # course_id = models.CharField(max_length=50, verbose_name="Course Code/ID")
     course_id = models.CharField(max_length=50, db_index=True, verbose_name="Course Code/ID")
     course_name = models.CharField(max_length=255)
     session = models.CharField(max_length=50, help_text="e.g., 2023-24, Spring-2026")
@@ -61,14 +60,12 @@ class Class(models.Model):
 
 
 class StudentMark(models.Model):
-    # এটি নির্দিষ্ট শিক্ষক, সেশন এবং কোর্সের কম্বিনেশনকে লক করবে
     assigned_course = models.ForeignKey(
         AssignedCourse, 
         on_delete=models.CASCADE, 
         related_name="student_marks"
     )
     
-    # কোন স্টুডেন্ট মার্কস পাচ্ছে (কাস্টম ইউজার মডেল থেকে ফিল্টারড)
     student = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
@@ -76,22 +73,18 @@ class StudentMark(models.Model):
         related_name="my_marks"
     )
     
-    # 📝 ৩টি কন্টিনিউয়াস অ্যাসেসমেন্ট ফিল্ড (Editable)
     assignment = models.FloatField(default=0.0)
     class_test_1 = models.FloatField(default=0.0)
     class_test_2 = models.FloatField(default=0.0)
     
-    # 🕒 অটোমেটিক অ্যাটেনডেন্স মার্কস (স্মার্ট ক্যালকুলেশন থেকে আসবে)
     attendance_marks = models.FloatField(default=0.0)
     
-    # 🔒 ফাইনাল লক স্ট্যাটাস (True হলে ফ্রন্টএন্ড-ব্যাকএন্ড দুই জায়গাতেই এডিট বন্ধ)
     is_locked = models.BooleanField(default=False)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        # একই সেশনের একই কোর্সে একজন স্টুডেন্ট কেবল একটিই মার্কস রো (Row) পাবে
         unique_together = ('assigned_course', 'student')
         verbose_name = "Student Mark"
         verbose_name_plural = "Student Marks"

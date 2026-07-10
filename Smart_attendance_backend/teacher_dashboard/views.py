@@ -27,7 +27,6 @@ def update_all_semesters(request):
     if not semester:
         return Response({"error": "Semester not provided"}, status=400)
 
-    # ✅ শুধু student role এর জন্য update করো
     User.objects.filter(role="student").update(semester=semester)
 
     return Response({"message": f"All students updated to {semester} semester"})
@@ -35,10 +34,7 @@ def update_all_semesters(request):
 
 @api_view(['GET'])
 def get_saved_marks(request, assigned_course_id):
-    """
-    ১. নির্দিষ্ট assigned_course_id এর আন্ডারে পূর্বে সেভ করা সব মার্কস 
-    এবং লক স্ট্যাটাস ফ্রন্টএন্ডে পাঠানোর GET এপিআই।
-    """
+    
     try:
         assigned_course = AssignedCourse.objects.get(id=assigned_course_id)
     except AssignedCourse.DoesNotExist:
@@ -66,22 +62,20 @@ def get_saved_marks(request, assigned_course_id):
     }, status=status.HTTP_200_OK)
 
 
+
+
+
+
 @api_view(['POST'])
 def save_or_lock_marks(request, assigned_course_id):
-    """
-    ২. নির্দিষ্ট assigned_course_id এর আন্ডারে শিক্ষার্থীদের মার্কস 
-    ডাটাবেজে সেভ, আপডেট বা লক করার POST এপিআই।
-    """
     try:
         assigned_course = AssignedCourse.objects.get(id=assigned_course_id)
     except AssignedCourse.DoesNotExist:
         return Response({"error": "Assigned Course not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # ফ্রন্টএন্ড থেকে পাঠানো ডাটা গ্রহণ
     marks_dict = request.data.get('marks', {})
     lock_course = request.data.get('lock_course', False)
 
-    # 🔒 সিকিউরিটি চেক: ডাটাবেজে এই কোর্সের মার্কস ইতিমধ্যে লক করা আছে কিনা
     already_locked = StudentMark.objects.filter(assigned_course=assigned_course, is_locked=True).exists()
     if already_locked:
         return Response(
@@ -89,31 +83,35 @@ def save_or_lock_marks(request, assigned_course_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # 🔄 লুপ চালিয়ে পাঠানো ডাটাবেজ রো তৈরি অথবা আপডেট (Update or Create) করা
     for student_id, marks in marks_dict.items():
         try:
-            # স্টুডেন্ট ফিল্টার করা হচ্ছে প্রাইমারি কি (ID) দিয়ে
             student_user = User.objects.get(id=student_id, role='student')
             
-            # ডাটাবেজে স্টুডেন্টের আইডি ও কোর্স আইডি ম্যাচ করলে আপডেট হবে, না থাকলে নতুন তৈরি হবে
+            def clean_mark(val):
+                try:
+                    return float(val) if val not in [None, ""] else 0.0
+                except (ValueError, TypeError):
+                    return 0.0
+
             StudentMark.objects.update_or_create(
                 assigned_course=assigned_course,
                 student=student_user,
                 defaults={
-                    'assignment': float(marks.get('assignment') or 0.0),
-                    'class_test_1': float(marks.get('ct1') or 0.0),       # 🔄 ফ্রন্টএন্ডের 'ct1' ডাটাবেজের 'class_test_1'-এ যাচ্ছে
-                    'class_test_2': float(marks.get('ct2') or 0.0),       # 🔄 ফ্রন্টএন্ডের 'ct2' ডাটাবেজের 'class_test_2'-এ যাচ্ছে
-                    'attendance_marks': float(marks.get('attendanceMarks') or 0.0), # 🔄 ফ্রন্টএন্ডের 'attendanceMarks'
-                    'is_locked': lock_course  # লক রিকোয়েস্ট ট্রু হলে ট্রু হবে
+                    'assignment': clean_mark(marks.get('assignment')),
+                    'class_test_1': clean_mark(marks.get('ct1')),       
+                    'class_test_2': clean_mark(marks.get('ct2')),       
+                    'attendance_marks': clean_mark(marks.get('attendanceMarks')), # 🎯 ফ্রন্টএন্ড থেকে আসা ডাইনামিক ইনপুট সেভ হবে
+                    'is_locked': lock_course  
                 }
             )
-        except (User.DoesNotExist, ValueError):
-            continue  # কোনো ভুল ডাটা বা অনুপস্থিত আইডি থাকলে সেটি স্কিপ করে পরেরটাতে যাবে
+        except User.DoesNotExist:
+            continue  
 
     if lock_course:
         return Response({"message": "Marksheet verified and archived successfully!"}, status=status.HTTP_200_OK)
         
     return Response({"message": "Marksheet progress updated successfully!"}, status=status.HTTP_200_OK)
+
 
 
 
@@ -379,28 +377,6 @@ def get_students(request):
 
 
 
-# @api_view(['GET'])
-# def course_class_summary(request):
-#     """
-#     প্রতিটি course_code + session অনুযায়ী কতগুলো class হয়েছে তার summary ফেরত দেবে।
-#     """
-#     summary = (
-#         Class.objects.values("course_code", "course_name", "session")
-#         .annotate(total_classes=Count("id"))
-#         .order_by("course_code", "session")
-#     )
-
-#     data = [
-#         {
-#             "course_code": item["course_code"],
-#             "course_name": item["course_name"],
-#             "session": item["session"],
-#             "total_classes": item["total_classes"],
-#         }
-#         for item in summary
-#     ]
-
-#     return Response(data)
 
 
 @api_view(['GET'])
@@ -421,7 +397,6 @@ def course_class_summary(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Teacher-এর assigned courses
     assigned_courses = AssignedCourse.objects.filter(teacher=teacher)
 
     summary = []
